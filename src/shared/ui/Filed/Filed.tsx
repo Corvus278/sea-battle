@@ -1,30 +1,6 @@
-'use client';
-
 import { cn } from '@/shared/utils';
-
-export type FiledProps = {};
-
-export enum TileType {
-  /**
-   * На этой плитке уничтоженный корабль
-   */
-  destroyed,
-  /**
-   * На этой плитке повреждённый корабль
-   */
-  harmed,
-  /**
-   * По этой плитке стреляли, но она пуста
-   */
-  empty,
-  /**
-   * По этой плитке ещё не стреляли
-   */
-  virgin,
-}
-type Tile = {
-  type: TileType;
-};
+import { type FiledProps, TileType, type Tile } from './types';
+import { Fragment } from 'react';
 
 const Tile = ({ tile }: { tile: Tile }) => {
   return (
@@ -44,42 +20,43 @@ const Tile = ({ tile }: { tile: Tile }) => {
   );
 };
 
-export const Filed = ({}: FiledProps) => {
-  const tilesMatrix: Tile[][] = [];
-
-  for (let rowI = 0; rowI < 10; rowI++) {
-    const row: Tile[] = [];
-
-    for (let tileI = 0; tileI < 10; tileI++) {
-      if (rowI === 2 && tileI === 3) {
-        row.push({ type: TileType.harmed });
-        continue;
-      }
-
-      if (rowI === 3 && tileI === 3) {
-        row.push({ type: TileType.empty });
-        continue;
-      }
-
-      if (rowI === 4 && [4, 5, 6].includes(tileI)) {
-        row.push({ type: TileType.destroyed });
-        continue;
-      }
-
-      row.push({ type: TileType.virgin });
-    }
-
-    tilesMatrix.push(row);
-  }
-
-  console.debug(tilesMatrix);
-
+export const Filed = ({ tilesMatrix }: FiledProps) => {
   return (
-    <div className={'size-[400px] flex flex-wrap'}>
-      {tilesMatrix.map((tilesRow) => {
-        return tilesRow.map((tile, i) => {
-          return <Tile key={i} tile={tile} />;
-        });
+    <div className={'size-[440px] flex flex-wrap'}>
+      <div className={'size-[40px] text-white flex justify-center items-center'}></div>
+
+      {tilesMatrix[0].map((_, i) => {
+        return (
+          <div
+            key={`indexColumn-${i}`}
+            className={'size-[40px] text-white flex justify-center items-center'}
+          >
+            {i}
+          </div>
+        );
+      })}
+
+      {tilesMatrix.map((tilesRow, rowIdx) => {
+        return (
+          <div className={'flex'} key={`row-${rowIdx}`}>
+            {tilesRow.map((tile, tileIdx) => {
+              return (
+                <Fragment key={`${tileIdx}${tile.type}`}>
+                  {tileIdx === 0 && (
+                    <div
+                      key={'index'}
+                      className={'size-[40px] text-white flex justify-center items-center'}
+                    >
+                      {rowIdx}
+                    </div>
+                  )}
+
+                  <Tile tile={tile} />
+                </Fragment>
+              );
+            })}
+          </div>
+        );
       })}
     </div>
   );
