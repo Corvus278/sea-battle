@@ -81,19 +81,16 @@ export default function Home() {
     [shipsPositions, hitsPositions]
   );
 
-  if (!isInitialized) {
-    return (
-      <div className={'container flex justify-center items-center size-full flex-col'}>
-        <h1 className={'mb-6 text-white text-3xl font-bold'}>Морской boy</h1>
-        <div className="text-white">Загрузка игры...</div>
-      </div>
-    );
-  }
-
   return (
-    <div className={'container flex justify-center items-center size-full flex-col'}>
+    <div className={'container mx-auto flex justify-center items-center size-full flex-col'}>
       <h1 className={'mb-6 text-white text-3xl font-bold'}>Морской boy</h1>
-      <Field tilesMatrix={tiles} />
+      {isInitialized ? (
+        <Field tilesMatrix={tiles} />
+      ) : (
+        <div className="flex justify-center items-center size-[440px]">
+          <p className="text-white">Загрузка игры...</p>
+        </div>
+      )}
     </div>
   );
 }
