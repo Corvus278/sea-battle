@@ -1,4 +1,10 @@
 /**
+ * Базовая ячейка позиции
+ */
+export type PositionCell = { x: number; y: number };
+export type PositionCellHash = `${number}-${number}`;
+
+/**
  * По одной оси корабль занимает минимум 1 клетку, максимиум - 4 (ограничения размеров кораблей)
  */
 export type ShipAxisPositionsList = number[];
@@ -24,7 +30,12 @@ export type ShipPosition = {
 /**
  * Позиция попадания
  * */
-export type HitPosition = {
+export type HitPositionCell = {
   x: number;
   y: number;
+};
+
+export type Ship = {
+  position: ShipPosition;
+  hits: HitPositionCell[];
 };

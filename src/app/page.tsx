@@ -1,44 +1,99 @@
 'use client';
 
-import { Filed, Tile, TileType } from '@/shared/ui/Filed';
-import { useMemo } from 'react';
-import { generateShipPositions, getCellsFromShip } from '@/shared/lib/generateShipPositions';
-import { ShipPosition } from '@/shared/types';
+import {
+  createTilesMatrix,
+  Field,
+  getTileFromMatrixByPosition,
+  TilesMatrix,
+  TileType,
+} from '@/shared/ui/Field';
+import { useMemo, useEffect } from 'react';
+import { HitPositionCell, ShipPosition } from '@/shared/types';
+import { useGameStore } from '@/shared/store';
+import { applyHitsToShips } from '@/shared/lib/applyHitsToShips';
+import { getCellsFromShip, getShipNeighbourCells } from '@/shared/lib/cellFeatures';
 
-const mapShipsToTiles = (ships: ShipPosition[]): Tile[][] => {
-  const tilesMatrix: Tile[][] = [];
+const addHitsToTiles = (
+  tiles: TilesMatrix,
+  hitsPositions: HitPositionCell[],
+  shipsPositions: ShipPosition[]
+) => {
+  const newTiles = [...tiles];
+  const shipsWithHits = applyHitsToShips(shipsPositions, hitsPositions);
 
-  for (let rowI = 0; rowI < 10; rowI++) {
-    const row: Tile[] = [];
+  // Наносим хиты на карту
+  hitsPositions.forEach((hit) => {
+    const tile = getTileFromMatrixByPosition(hit, newTiles);
 
-    for (let tileI = 0; tileI < 10; tileI++) {
-      // console.debug('{ type: TileType.virgin }', { type: TileType.virgin });
-      row.push({ type: TileType.virgin });
+    if (tile.type === TileType.virgin) {
+      tile.type = TileType.empty;
+      return;
     }
+  });
 
-    tilesMatrix.push(row);
-    // console.debug('2', JSON.stringify(tilesMatrix));
-  }
-
-  ships.forEach((ship) => {
+  // Наносим корабли на карту
+  shipsWithHits.forEach((ship) => {
+    const { hits } = ship;
     const shipCells = getCellsFromShip(ship);
 
-    shipCells.forEach((cell) => {
-      tilesMatrix[cell.y][cell.x].type = TileType.destroyed;
+    // Корабль уничтожен
+    if (hits.length === shipCells.length) {
+      // Отображаем корабль
+      shipCells.forEach((cell) => {
+        const tile = getTileFromMatrixByPosition(cell, newTiles);
+        tile.type = TileType.destroyed;
+      });
+
+      // Закрываем соседние кораблю ячейки
+      const shipNeighboursCells = getShipNeighbourCells(ship);
+      shipNeighboursCells.forEach((cell) => {
+        const tile = getTileFromMatrixByPosition(cell, newTiles);
+        tile.type = TileType.empty;
+      });
+
+      return;
+    }
+
+    // Корабль не уничтожен. Отображаем повреждённые части
+    hits.forEach((hit) => {
+      const tile = getTileFromMatrixByPosition(hit, newTiles);
+      tile.type = TileType.harmed;
     });
   });
 
-  return tilesMatrix;
+  return newTiles;
 };
 
 export default function Home() {
-  const tiles = useMemo(() => mapShipsToTiles(generateShipPositions()), []);
+  const shipsPositions = useGameStore((state) => state.shipsPositions);
+  const hitsPositions = useGameStore((state) => state.hitsPositions);
+  const isInitialized = useGameStore((state) => state.isInitialized);
+  const initializeShips = useGameStore((state) => state.initializeShips);
+
+  useEffect(() => {
+    if (typeof window !== 'undefined' && !isInitialized) {
+      initializeShips();
+    }
+  }, [initializeShips, isInitialized]);
+
+  const tiles = useMemo(
+    () => addHitsToTiles(createTilesMatrix(), hitsPositions, shipsPositions),
+    [shipsPositions, hitsPositions]
+  );
+
+  if (!isInitialized) {
+    return (
+      <div className={'container flex justify-center items-center size-full flex-col'}>
+        <h1 className={'mb-6 text-white text-3xl font-bold'}>Морской boy</h1>
+        <div className="text-white">Загрузка игры...</div>
+      </div>
+    );
+  }
 
   return (
     <div className={'container flex justify-center items-center size-full flex-col'}>
       <h1 className={'mb-6 text-white text-3xl font-bold'}>Морской boy</h1>
-
-      <Filed tilesMatrix={tiles} />
+      <Field tilesMatrix={tiles} />
     </div>
   );
 }

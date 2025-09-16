@@ -1,8 +1,13 @@
-import { cn } from '@/shared/utils';
-import { type FiledProps, TileType, type Tile } from './types';
-import { Fragment } from 'react';
+'use client';
 
-const Tile = ({ tile }: { tile: Tile }) => {
+import { Fragment } from 'react';
+import { cn } from '@/shared/utils';
+import { type FiledProps, type Tile, type TileProps, TileType } from './types';
+import { useGameStore } from '@/shared/store';
+
+const Tile = ({ tile, y, x }: TileProps) => {
+  const addHit = useGameStore((state) => state.addHit);
+
   return (
     <button
       className={cn(
@@ -16,11 +21,14 @@ const Tile = ({ tile }: { tile: Tile }) => {
         }
       )}
       disabled={tile.type !== TileType.virgin}
+      onClick={() => {
+        addHit({ x, y });
+      }}
     />
   );
 };
 
-export const Filed = ({ tilesMatrix }: FiledProps) => {
+export const Field = ({ tilesMatrix }: FiledProps) => {
   return (
     <div className={'size-[440px] flex flex-wrap'}>
       <div className={'size-[40px] text-white flex justify-center items-center'}></div>
@@ -41,7 +49,7 @@ export const Filed = ({ tilesMatrix }: FiledProps) => {
           <div className={'flex'} key={`row-${rowIdx}`}>
             {tilesRow.map((tile, tileIdx) => {
               return (
-                <Fragment key={`${tileIdx}${tile.type}`}>
+                <Fragment key={`${tileIdx}-${tile.type}`}>
                   {tileIdx === 0 && (
                     <div
                       key={'index'}
@@ -51,7 +59,7 @@ export const Filed = ({ tilesMatrix }: FiledProps) => {
                     </div>
                   )}
 
-                  <Tile tile={tile} />
+                  <Tile tile={tile} x={tileIdx} y={rowIdx} key={`tile-${rowIdx}-${tileIdx}`} />
                 </Fragment>
               );
             })}

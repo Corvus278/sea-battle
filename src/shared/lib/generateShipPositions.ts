@@ -1,4 +1,16 @@
-import { ShipAxisPositionsList, ShipPosition } from '@/shared/types';
+import {
+  PositionCell,
+  PositionCellHash,
+  ShipAxisPositionsList,
+  ShipPosition,
+} from '@/shared/types';
+import {
+  allDirections,
+  createCellFromHash,
+  createCellHash,
+  Direction,
+  getNeighbourCells,
+} from '@/shared/lib/cellFeatures';
 
 /**
  * Кораблей всего 10
@@ -11,18 +23,6 @@ const createShip = (x: ShipAxisPositionsList, y: ShipAxisPositionsList): ShipPos
   };
 };
 
-type Cell = { x: number; y: number };
-type CellHash = `${number}-${number}`;
-
-const createCellHash = (cell: Cell): CellHash => {
-  return `${cell.x}-${cell.y}`;
-};
-
-const createCellFromHash = (hash: CellHash): Cell => {
-  const [x, y] = hash.split('-').map(Number);
-  return { x, y };
-};
-
 /**
  * Returns a random element from the array using crypto-secure randomness
  */
@@ -33,8 +33,8 @@ const getRandomElement = <T>(array: T[]): T => {
   return array[randomIndex];
 };
 
-const emptyCellsTemplate: CellHash[] = (() => {
-  const res: CellHash[] = [];
+const emptyCellsTemplate: PositionCellHash[] = (() => {
+  const res: PositionCellHash[] = [];
 
   for (let x = 0; x < 10; x++) {
     for (let y = 0; y < 10; y++) {
@@ -47,74 +47,21 @@ const emptyCellsTemplate: CellHash[] = (() => {
 
 const shipsSizesByOrder = [4, 3, 3, 2, 2, 2, 1, 1, 1, 1];
 
-type Direction = 'top' | 'bottom' | 'left' | 'right' | 'diagonal';
-const allDirections: Direction[] = ['top', 'bottom', 'left', 'right', 'diagonal'];
 const allShipsDirections: Direction[] = ['top', 'bottom', 'left', 'right'];
-
-export const getCellsFromShip = (ship: ShipPosition): Cell[] => {
-  return ship.x.flatMap((x) => {
-    return ship.y.map((y) => {
-      return { x, y };
-    });
-  });
-};
 
 export const generateShipPositions = (): ShipPosition[] => {
   const ships: ShipPosition[] = [];
-  const emptyCellsHashesSet: Set<CellHash> = new Set(emptyCellsTemplate);
+  const emptyCellsHashesSet: Set<PositionCellHash> = new Set(emptyCellsTemplate);
 
-  const checkIsCellEmpty = (cell: Cell) => emptyCellsHashesSet.has(createCellHash(cell));
-
-  const checkIsCellInField = (_cell: Cell) =>
-    _cell.x >= 0 && _cell.x < 10 && _cell.y >= 0 && _cell.y < 10;
+  const checkIsCellEmpty = (cell: PositionCell) => emptyCellsHashesSet.has(createCellHash(cell));
 
   const getRandomEmptyCell = () => {
     return createCellFromHash(getRandomElement(Array.from(emptyCellsHashesSet)));
   };
 
-  const getNeighbourCells = (cell: Cell, direction: Direction, count: number) => {
-    const cells: Cell[] = [];
-
-    for (let i = 0; i < count; i++) {
-      switch (direction) {
-        case 'top': {
-          cells.push({ x: cell.x, y: cell.y - i - 1 });
-          break;
-        }
-
-        case 'bottom': {
-          cells.push({ x: cell.x, y: cell.y + i + 1 });
-          break;
-        }
-
-        case 'left': {
-          cells.push({ x: cell.x - i - 1, y: cell.y });
-          break;
-        }
-
-        case 'diagonal': {
-          // left top
-          cells.push({ x: cell.x - i - 1, y: cell.y - i - 1 });
-          // right bottom
-          cells.push({ x: cell.x - i + 1, y: cell.y - i + 1 });
-          // left bottom
-          cells.push({ x: cell.x - i - 1, y: cell.y - i + 1 });
-          // right top
-          cells.push({ x: cell.x - i + 1, y: cell.y - i - 1 });
-          break;
-        }
-
-        default:
-          cells.push({ x: cell.x + i + 1, y: cell.y });
-      }
-    }
-
-    return cells;
-  };
-
-  const getNeighbourCellsIfAllValid = (cell: Cell, direction: Direction, count: number) => {
+  const getNeighbourCellsIfAllValid = (cell: PositionCell, direction: Direction, count: number) => {
     const cells = getNeighbourCells(cell, direction, count).filter((_cell) => {
-      return checkIsCellEmpty(_cell) && checkIsCellInField(_cell);
+      return checkIsCellEmpty(_cell);
     });
 
     if (cells.length !== count) {
@@ -124,13 +71,13 @@ export const generateShipPositions = (): ShipPosition[] => {
     return cells;
   };
 
-  const getAllPossibleDirectionsNeighbourCells = (cell: Cell, count: number) => {
+  const getAllPossibleDirectionsNeighbourCells = (cell: PositionCell, count: number) => {
     return allShipsDirections
       .map((direction) => getNeighbourCellsIfAllValid(cell, direction, count))
       .filter((cells) => cells.length);
   };
 
-  const getShipCells = (size: number): Cell[] => {
+  const getShipCells = (size: number): PositionCell[] => {
     let timeoutCounter = 0;
 
     while (true) {
@@ -159,10 +106,10 @@ export const generateShipPositions = (): ShipPosition[] => {
     }
   };
 
-  const getShipFromCells = (shipCells: Cell[]) => {
+  const getShipFromCells = (shipCells: PositionCell[]) => {
     const getShipSellSeq = (
-      cells: Cell[],
-      getCoord: (cell: Cell) => number
+      cells: PositionCell[],
+      getCoord: (cell: PositionCell) => number
     ): ShipAxisPositionsList => {
       if (cells[1] && getCoord(cells[0]) === getCoord(cells[1])) {
         return [getCoord(cells[0])];
@@ -177,11 +124,11 @@ export const generateShipPositions = (): ShipPosition[] => {
     );
   };
 
-  const occupyCell = (cell: Cell) => emptyCellsHashesSet.delete(createCellHash(cell));
+  const occupyCell = (cell: PositionCell) => emptyCellsHashesSet.delete(createCellHash(cell));
 
-  const occupyCells = (cells: Cell[]) => cells.forEach(occupyCell);
+  const occupyCells = (cells: PositionCell[]) => cells.forEach(occupyCell);
 
-  const occupyCellWithNeighbours = (cell: Cell) => {
+  const occupyCellWithNeighbours = (cell: PositionCell) => {
     const cellWithNeighbours = [
       cell,
       ...allDirections.flatMap((direction) => {
@@ -192,7 +139,7 @@ export const generateShipPositions = (): ShipPosition[] => {
     occupyCells(cellWithNeighbours);
   };
 
-  const occupyCellsForShip = (shipCells: Cell[]) => {
+  const occupyCellsForShip = (shipCells: PositionCell[]) => {
     shipCells.forEach(occupyCellWithNeighbours);
   };
 
