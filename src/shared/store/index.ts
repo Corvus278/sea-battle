@@ -1,16 +1,22 @@
 import { create, StateCreator } from 'zustand';
-import { HitPositionCell, ShipPosition } from '@/shared/types';
+import { HitPositionCell, Player, ShipPosition } from '@/shared/types';
 import { generateShipPositions } from '@/shared/lib/generateShipPositions';
 import { combine, devtools } from 'zustand/middleware';
+import { immer } from 'zustand/middleware/immer';
 
 export type GameStoreData = {
+  1: PlayerStoreData;
+  2: PlayerStoreData;
+};
+
+export type PlayerStoreData = {
   shipsPositions: ShipPosition[];
   hitsPositions: HitPositionCell[];
   isInitialized: boolean;
 };
 
 export type GameStoreActions = {
-  addHit: (hitPosition: HitPositionCell) => void;
+  addHit: (hitPosition: HitPositionCell, forPlayer: Player['id']) => void;
   initializeShips: () => void;
 };
 
@@ -18,33 +24,43 @@ const middlewares = (
   initialState: GameStoreData,
   actionsCreator: StateCreator<GameStoreData, [], [], GameStoreActions>
 ) => {
-  return devtools(combine<GameStoreData, GameStoreActions>(initialState, actionsCreator));
+  return devtools(immer(combine<GameStoreData, GameStoreActions>(initialState, actionsCreator)));
 };
 
-export const useGameStore = create(
+export const useGameStore = create<GameStoreData & GameStoreActions>()(
   middlewares(
     {
-      shipsPositions: [],
-      hitsPositions: [],
-      isInitialized: false,
+      1: {
+        shipsPositions: [],
+        hitsPositions: [],
+        isInitialized: false,
+      },
+      2: {
+        shipsPositions: [],
+        hitsPositions: [],
+        isInitialized: false,
+      },
     },
-    (set) => {
-      return {
-        addHit: (hitPosition: HitPositionCell) => {
-          set((state) => ({
-            hitsPositions: [...state.hitsPositions, hitPosition],
-          }));
-        },
-        initializeShips: () => {
-          set((state) => {
-            if (state.isInitialized) return state;
-            return {
-              shipsPositions: generateShipPositions(),
-              isInitialized: true,
-            };
+    (set) => ({
+      addHit: (hitPosition: HitPositionCell, forPlayer: Player['id']) => {
+        set((state) => {
+          state[forPlayer].hitsPositions.push(hitPosition);
+          return state;
+        });
+      },
+      initializeShips: () => {
+        set((state) => {
+          const playerIds = [1, 2] as const;
+          playerIds.forEach((playerId) => {
+            if (!state[playerId].isInitialized) {
+              state[playerId].shipsPositions = generateShipPositions();
+              state[playerId].isInitialized = true;
+            }
           });
-        },
-      };
-    }
+
+          return state;
+        });
+      },
+    })
   )
 );

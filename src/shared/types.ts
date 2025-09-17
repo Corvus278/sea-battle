@@ -39,3 +39,7 @@ export type Ship = {
   position: ShipPosition;
   hits: HitPositionCell[];
 };
+
+export type Player = {
+  id: 1 | 2;
+};

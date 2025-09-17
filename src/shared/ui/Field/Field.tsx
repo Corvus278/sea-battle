@@ -1,34 +1,39 @@
 'use client';
 
-import { Fragment } from 'react';
+import { Fragment, memo } from 'react';
 import { cn } from '@/shared/utils';
 import { type FiledProps, type Tile, type TileProps, TileType } from './types';
-import { useGameStore } from '@/shared/store';
 
-const Tile = ({ tile, y, x }: TileProps) => {
-  const addHit = useGameStore((state) => state.addHit);
+const Tile = memo(
+  ({ tile, y, x, onHit }: TileProps) => {
+    return (
+      <button
+        className={cn(
+          'size-[40px]  border border-solid border-stone-900 shrink-0 cursor-pointer ',
+          'transition-colors enabled:hover:bg-teal-600 disabled:cursor-default',
+          {
+            'bg-teal-800': tile.type === TileType.virgin,
+            'bg-teal-600': tile.type === TileType.empty,
+            'bg-red-500': tile.type === TileType.harmed,
+            'bg-black': tile.type === TileType.destroyed,
+          }
+        )}
+        disabled={tile.type !== TileType.virgin}
+        onClick={() => {
+          onHit({ x, y });
+        }}
+      />
+    );
+  },
+  (prevProps, nextProps) =>
+    prevProps.tile.type === nextProps.tile.type &&
+    prevProps.x === nextProps.x &&
+    prevProps.y === nextProps.y &&
+    prevProps.onHit === nextProps.onHit
+);
+Tile.displayName = 'Tile';
 
-  return (
-    <button
-      className={cn(
-        'size-[40px]  border border-solid border-stone-900 shrink-0 cursor-pointer ',
-        'transition-colors enabled:hover:bg-teal-600 disabled:cursor-default',
-        {
-          'bg-teal-800': tile.type === TileType.virgin,
-          'bg-teal-600': tile.type === TileType.empty,
-          'bg-red-500': tile.type === TileType.harmed,
-          'bg-black': tile.type === TileType.destroyed,
-        }
-      )}
-      disabled={tile.type !== TileType.virgin}
-      onClick={() => {
-        addHit({ x, y });
-      }}
-    />
-  );
-};
-
-export const Field = ({ tilesMatrix }: FiledProps) => {
+export const Field = ({ tilesMatrix, onHit }: FiledProps) => {
   return (
     <div className={'size-[440px] flex flex-wrap'}>
       <div className={'size-[40px] text-white flex justify-center items-center'}></div>
@@ -59,7 +64,13 @@ export const Field = ({ tilesMatrix }: FiledProps) => {
                     </div>
                   )}
 
-                  <Tile tile={tile} x={tileIdx} y={rowIdx} key={`tile-${rowIdx}-${tileIdx}`} />
+                  <Tile
+                    tile={tile}
+                    x={tileIdx}
+                    y={rowIdx}
+                    key={`tile-${rowIdx}-${tileIdx}`}
+                    onHit={onHit}
+                  />
                 </Fragment>
               );
             })}

@@ -7,8 +7,8 @@ import {
   TilesMatrix,
   TileType,
 } from '@/shared/ui/Field';
-import { useMemo, useEffect } from 'react';
-import { HitPositionCell, ShipPosition } from '@/shared/types';
+import { useMemo, useEffect, useCallback } from 'react';
+import { HitPositionCell, Player, ShipPosition } from '@/shared/types';
 import { useGameStore } from '@/shared/store';
 import { applyHitsToShips } from '@/shared/lib/applyHitsToShips';
 import { getCellsFromShip, getShipNeighbourCells } from '@/shared/lib/cellFeatures';
@@ -64,33 +64,49 @@ const addHitsToTiles = (
   return newTiles;
 };
 
-export default function Home() {
-  const shipsPositions = useGameStore((state) => state.shipsPositions);
-  const hitsPositions = useGameStore((state) => state.hitsPositions);
-  const isInitialized = useGameStore((state) => state.isInitialized);
-  const initializeShips = useGameStore((state) => state.initializeShips);
-
-  useEffect(() => {
-    if (typeof window !== 'undefined' && !isInitialized) {
-      initializeShips();
-    }
-  }, [initializeShips, isInitialized]);
-
+const PlayerField = ({ playerId }: { playerId: Player['id'] }) => {
+  const shipsPositions = useGameStore((state) => state[playerId].shipsPositions);
+  const hitsPositions = useGameStore((state) => state[playerId].hitsPositions);
+  const isInitialized = useGameStore((state) => state[playerId].isInitialized);
+  const addHit = useGameStore((state) => state.addHit);
   const tiles = useMemo(
     () => addHitsToTiles(createTilesMatrix(), hitsPositions, shipsPositions),
     [shipsPositions, hitsPositions]
   );
+  const handleHit = useCallback(
+    (hitPosition: HitPositionCell) => {
+      addHit(hitPosition, playerId);
+    },
+    [addHit, playerId]
+  );
+
+  if (!isInitialized) {
+    return (
+      <div className="flex justify-center items-center size-[440px]">
+        <p className="text-white">Загрузка игры...</p>
+      </div>
+    );
+  }
+
+  return <Field tilesMatrix={tiles} onHit={handleHit} />;
+};
+
+export default function Home() {
+  const initializeShips = useGameStore((state) => state.initializeShips);
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      initializeShips();
+    }
+  }, [initializeShips]);
 
   return (
     <div className={'container mx-auto flex justify-center items-center size-full flex-col'}>
       <h1 className={'mb-6 text-white text-3xl font-bold'}>Морской boy</h1>
-      {isInitialized ? (
-        <Field tilesMatrix={tiles} />
-      ) : (
-        <div className="flex justify-center items-center size-[440px]">
-          <p className="text-white">Загрузка игры...</p>
-        </div>
-      )}
+      <div className={'flex justify-center items-center gap-8'}>
+        <PlayerField playerId={1} />
+        <PlayerField playerId={2} />
+      </div>
     </div>
   );
 }
