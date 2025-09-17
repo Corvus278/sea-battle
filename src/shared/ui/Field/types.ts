@@ -36,4 +36,5 @@ export type TilesMatrix = Tile[][];
 export type FiledProps = {
   tilesMatrix: TilesMatrix;
   onHit: OnHit;
+  isActive: boolean;
 };

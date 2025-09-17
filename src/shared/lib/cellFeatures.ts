@@ -12,6 +12,10 @@ export const createCellFromHash = (hash: PositionCellHash): PositionCell => {
   return { x, y };
 };
 
+export const compareCells = (cell1: PositionCell, cell2: PositionCell) => {
+  return cell1.x === cell2.x && cell1.y === cell2.y;
+};
+
 export const getCellsFromShipPosition = (shipPosition: ShipPosition): PositionCell[] => {
   return shipPosition.x.flatMap((x) => {
     return shipPosition.y.map((y) => {

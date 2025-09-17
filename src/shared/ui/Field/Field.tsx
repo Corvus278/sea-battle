@@ -1,6 +1,6 @@
 'use client';
 
-import { Fragment, memo } from 'react';
+import { memo } from 'react';
 import { cn } from '@/shared/utils';
 import { type FiledProps, type Tile, type TileProps, TileType } from './types';
 
@@ -33,45 +33,25 @@ const Tile = memo(
 );
 Tile.displayName = 'Tile';
 
-export const Field = ({ tilesMatrix, onHit }: FiledProps) => {
+export const Field = ({ tilesMatrix, onHit, isActive }: FiledProps) => {
   return (
-    <div className={'size-[440px] flex flex-wrap'}>
-      <div className={'size-[40px] text-white flex justify-center items-center'}></div>
-
-      {tilesMatrix[0].map((_, i) => {
-        return (
-          <div
-            key={`indexColumn-${i}`}
-            className={'size-[40px] text-white flex justify-center items-center'}
-          >
-            {i}
-          </div>
-        );
+    <div
+      className={cn('size-[400px] flex flex-wrap transition pointer-events-none', {
+        'scale-[1.05] pointer-events-auto brightness-100': isActive,
       })}
-
+    >
       {tilesMatrix.map((tilesRow, rowIdx) => {
         return (
           <div className={'flex'} key={`row-${rowIdx}`}>
             {tilesRow.map((tile, tileIdx) => {
               return (
-                <Fragment key={`${tileIdx}-${tile.type}`}>
-                  {tileIdx === 0 && (
-                    <div
-                      key={'index'}
-                      className={'size-[40px] text-white flex justify-center items-center'}
-                    >
-                      {rowIdx}
-                    </div>
-                  )}
-
-                  <Tile
-                    tile={tile}
-                    x={tileIdx}
-                    y={rowIdx}
-                    key={`tile-${rowIdx}-${tileIdx}`}
-                    onHit={onHit}
-                  />
-                </Fragment>
+                <Tile
+                  tile={tile}
+                  x={tileIdx}
+                  y={rowIdx}
+                  onHit={onHit}
+                  key={`${tileIdx}-${tile.type}`}
+                />
               );
             })}
           </div>

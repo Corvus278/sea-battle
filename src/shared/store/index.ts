@@ -3,10 +3,12 @@ import { HitPositionCell, Player, ShipPosition } from '@/shared/types';
 import { generateShipPositions } from '@/shared/lib/generateShipPositions';
 import { combine, devtools } from 'zustand/middleware';
 import { immer } from 'zustand/middleware/immer';
+import { checkIsHitOnShip } from '@/shared/lib/checkIsHitOnShip';
 
 export type GameStoreData = {
   1: PlayerStoreData;
   2: PlayerStoreData;
+  activePlayer: Player['id'];
 };
 
 export type PlayerStoreData = {
@@ -40,11 +42,25 @@ export const useGameStore = create<GameStoreData & GameStoreActions>()(
         hitsPositions: [],
         isInitialized: false,
       },
+      activePlayer: 1,
     },
     (set) => ({
       addHit: (hitPosition: HitPositionCell, forPlayer: Player['id']) => {
         set((state) => {
+          if (forPlayer === state.activePlayer) {
+            return state;
+          }
+
           state[forPlayer].hitsPositions.push(hitPosition);
+
+          if (
+            !state[forPlayer].shipsPositions.some((shipPosition) =>
+              checkIsHitOnShip(shipPosition, hitPosition)
+            )
+          ) {
+            state.activePlayer = forPlayer;
+          }
+
           return state;
         });
       },

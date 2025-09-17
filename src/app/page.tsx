@@ -68,6 +68,7 @@ const PlayerField = ({ playerId }: { playerId: Player['id'] }) => {
   const shipsPositions = useGameStore((state) => state[playerId].shipsPositions);
   const hitsPositions = useGameStore((state) => state[playerId].hitsPositions);
   const isInitialized = useGameStore((state) => state[playerId].isInitialized);
+  const activePlayer = useGameStore((state) => state.activePlayer);
   const addHit = useGameStore((state) => state.addHit);
   const tiles = useMemo(
     () => addHitsToTiles(createTilesMatrix(), hitsPositions, shipsPositions),
@@ -82,13 +83,13 @@ const PlayerField = ({ playerId }: { playerId: Player['id'] }) => {
 
   if (!isInitialized) {
     return (
-      <div className="flex justify-center items-center size-[440px]">
+      <div className="flex justify-center items-center size-[400px]">
         <p className="text-white">Загрузка игры...</p>
       </div>
     );
   }
 
-  return <Field tilesMatrix={tiles} onHit={handleHit} />;
+  return <Field tilesMatrix={tiles} onHit={handleHit} isActive={activePlayer !== playerId} />;
 };
 
 export default function Home() {
@@ -102,7 +103,7 @@ export default function Home() {
 
   return (
     <div className={'container mx-auto flex justify-center items-center size-full flex-col'}>
-      <h1 className={'mb-6 text-white text-3xl font-bold'}>Морской boy</h1>
+      <h1 className={'mb-10 text-white text-3xl font-bold'}>Морской boy</h1>
       <div className={'flex justify-center items-center gap-8'}>
         <PlayerField playerId={1} />
         <PlayerField playerId={2} />
