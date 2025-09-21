@@ -4,6 +4,10 @@ export enum TileType {
    */
   virgin,
   /**
+   * По этой плитке ещё не стреляли, и на ней есть корабль
+   */
+  virginNoEmpty,
+  /**
   /**
    * По этой плитке стреляли, но она пуста
    */
@@ -25,6 +29,7 @@ export type TileProps = {
   x: number;
   y: number;
   onHit: OnHit;
+  needShowVirginNoEmpty?: boolean;
 };
 
 export type Tile = {
@@ -37,4 +42,5 @@ export type FiledProps = {
   tilesMatrix: TilesMatrix;
   onHit: OnHit;
   isActive: boolean;
+  needShowVirginNoEmpty?: boolean;
 };

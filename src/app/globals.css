@@ -1,4 +1,4 @@
-@import "tailwindcss";
+@import 'tailwindcss';
 
 html {
   background: var(--color-stone-900);
@@ -6,4 +6,18 @@ html {
 
 body {
   font-family: Helvetica, Arial, sans-serif;
+}
+
+@theme {
+  --animate-tile-pulse: tile-pulse 1s ease-in-out infinite;
+
+  @keyframes tile-pulse {
+    0%,
+    100% {
+      background: var(--color-black);
+    }
+    70% {
+      background: var(--color-teal-800);
+    }
+  }
 }

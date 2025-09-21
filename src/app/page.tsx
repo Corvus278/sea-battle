@@ -12,6 +12,7 @@ import { HitPositionCell, Player, ShipPosition } from '@/shared/types';
 import { useGameStore } from '@/shared/store';
 import { applyHitsToShips } from '@/shared/lib/applyHitsToShips';
 import { getCellsFromShip, getShipNeighbourCells } from '@/shared/lib/cellFeatures';
+import { checkIsShipDestroyed } from '@/shared/lib/checkIsShipsDestroyed';
 
 const addHitsToTiles = (
   tiles: TilesMatrix,
@@ -36,8 +37,14 @@ const addHitsToTiles = (
     const { hits } = ship;
     const shipCells = getCellsFromShip(ship);
 
+    // Отмечаем корабль на карте
+    shipCells.forEach((cell) => {
+      const tile = getTileFromMatrixByPosition(cell, newTiles);
+      tile.type = TileType.virginNoEmpty;
+    });
+
     // Корабль уничтожен
-    if (hits.length === shipCells.length) {
+    if (checkIsShipDestroyed(ship)) {
       // Отображаем корабль
       shipCells.forEach((cell) => {
         const tile = getTileFromMatrixByPosition(cell, newTiles);
@@ -70,6 +77,10 @@ const PlayerField = ({ playerId }: { playerId: Player['id'] }) => {
   const isInitialized = useGameStore((state) => state[playerId].isInitialized);
   const activePlayer = useGameStore((state) => state.activePlayer);
   const addHit = useGameStore((state) => state.addHit);
+  const winner = useGameStore((state) => state.winner);
+  const isWinner = winner === playerId;
+  const hasWinner = Boolean(winner);
+
   const tiles = useMemo(
     () => addHitsToTiles(createTilesMatrix(), hitsPositions, shipsPositions),
     [shipsPositions, hitsPositions]
@@ -89,7 +100,14 @@ const PlayerField = ({ playerId }: { playerId: Player['id'] }) => {
     );
   }
 
-  return <Field tilesMatrix={tiles} onHit={handleHit} isActive={activePlayer !== playerId} />;
+  return (
+    <Field
+      tilesMatrix={tiles}
+      onHit={handleHit}
+      isActive={activePlayer !== playerId && !hasWinner}
+      needShowVirginNoEmpty={isWinner}
+    />
+  );
 };
 
 export default function Home() {
@@ -103,7 +121,7 @@ export default function Home() {
 
   return (
     <div className={'container mx-auto flex justify-center items-center size-full flex-col'}>
-      <h1 className={'mb-10 text-white text-3xl font-bold'}>Морской boy</h1>
+      <h1 className={'mb-10 text-white text-3xl font-bold font-mono'}>Морской boy</h1>
       <div className={'flex justify-center items-center gap-8'}>
         <PlayerField playerId={1} />
         <PlayerField playerId={2} />

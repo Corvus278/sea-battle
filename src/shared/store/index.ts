@@ -4,11 +4,14 @@ import { generateShipPositions } from '@/shared/lib/generateShipPositions';
 import { combine, devtools } from 'zustand/middleware';
 import { immer } from 'zustand/middleware/immer';
 import { checkIsHitOnShip } from '@/shared/lib/checkIsHitOnShip';
+import { applyHitsToShips } from '@/shared/lib/applyHitsToShips';
+import { checkIsShipsDestroyed } from '@/shared/lib/checkIsShipsDestroyed';
 
 export type GameStoreData = {
   1: PlayerStoreData;
   2: PlayerStoreData;
   activePlayer: Player['id'];
+  winner: Player['id'] | null;
 };
 
 export type PlayerStoreData = {
@@ -43,9 +46,15 @@ export const useGameStore = create<GameStoreData & GameStoreActions>()(
         isInitialized: false,
       },
       activePlayer: 1,
+      winner: null,
     },
-    (set) => ({
+    (set, getState) => ({
       addHit: (hitPosition: HitPositionCell, forPlayer: Player['id']) => {
+        const isHitOnShip = getState()[forPlayer].shipsPositions.some((shipPosition) =>
+          checkIsHitOnShip(shipPosition, hitPosition)
+        );
+        const prevActivePlayerId = getState().activePlayer;
+
         set((state) => {
           if (forPlayer === state.activePlayer) {
             return state;
@@ -53,16 +62,32 @@ export const useGameStore = create<GameStoreData & GameStoreActions>()(
 
           state[forPlayer].hitsPositions.push(hitPosition);
 
-          if (
-            !state[forPlayer].shipsPositions.some((shipPosition) =>
-              checkIsHitOnShip(shipPosition, hitPosition)
-            )
-          ) {
+          if (!isHitOnShip) {
             state.activePlayer = forPlayer;
+            return state;
           }
 
           return state;
         });
+
+        if (isHitOnShip) {
+          setTimeout(() => {
+            set((state) => {
+              const playerState = state[forPlayer];
+
+              const shipsWithHits = applyHitsToShips(
+                playerState.shipsPositions,
+                playerState.hitsPositions
+              );
+
+              if (checkIsShipsDestroyed(shipsWithHits)) {
+                state.winner = prevActivePlayerId;
+              }
+
+              return state;
+            });
+          });
+        }
       },
       initializeShips: () => {
         set((state) => {
@@ -73,6 +98,8 @@ export const useGameStore = create<GameStoreData & GameStoreActions>()(
               state[playerId].isInitialized = true;
             }
           });
+
+          state.winner = null;
 
           return state;
         });

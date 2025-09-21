@@ -5,20 +5,23 @@ import { cn } from '@/shared/utils';
 import { type FiledProps, type Tile, type TileProps, TileType } from './types';
 
 const Tile = memo(
-  ({ tile, y, x, onHit }: TileProps) => {
+  ({ tile, y, x, onHit, needShowVirginNoEmpty = false }: TileProps) => {
     return (
       <button
         className={cn(
-          'size-[40px]  border border-solid border-stone-900 shrink-0 cursor-pointer ',
+          'size-[40px]  border border-solid border-stone-900 shrink-0 cursor-pointer',
           'transition-colors enabled:hover:bg-teal-600 disabled:cursor-default',
           {
-            'bg-teal-800': tile.type === TileType.virgin,
+            'bg-teal-800':
+              tile.type === TileType.virgin ||
+              (tile.type === TileType.virginNoEmpty && !needShowVirginNoEmpty),
             'bg-teal-600': tile.type === TileType.empty,
             'bg-red-500': tile.type === TileType.harmed,
             'bg-black': tile.type === TileType.destroyed,
+            'animate-tile-pulse': tile.type === TileType.virginNoEmpty && needShowVirginNoEmpty,
           }
         )}
-        disabled={tile.type !== TileType.virgin}
+        disabled={![TileType.virgin, TileType.virginNoEmpty].includes(tile.type)}
         onClick={() => {
           onHit({ x, y });
         }}
@@ -29,11 +32,17 @@ const Tile = memo(
     prevProps.tile.type === nextProps.tile.type &&
     prevProps.x === nextProps.x &&
     prevProps.y === nextProps.y &&
-    prevProps.onHit === nextProps.onHit
+    prevProps.onHit === nextProps.onHit &&
+    prevProps.needShowVirginNoEmpty === nextProps.needShowVirginNoEmpty
 );
 Tile.displayName = 'Tile';
 
-export const Field = ({ tilesMatrix, onHit, isActive }: FiledProps) => {
+export const Field = ({
+  tilesMatrix,
+  onHit,
+  isActive,
+  needShowVirginNoEmpty = false,
+}: FiledProps) => {
   return (
     <div
       className={cn('size-[400px] flex flex-wrap transition pointer-events-none', {
@@ -51,6 +60,7 @@ export const Field = ({ tilesMatrix, onHit, isActive }: FiledProps) => {
                   y={rowIdx}
                   onHit={onHit}
                   key={`${tileIdx}-${tile.type}`}
+                  needShowVirginNoEmpty={needShowVirginNoEmpty}
                 />
               );
             })}
