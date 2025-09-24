@@ -9,7 +9,7 @@ const Tile = memo(
     return (
       <button
         className={cn(
-          'size-[40px]  border border-solid border-stone-900 shrink-0 cursor-pointer',
+          'border border-solid border-stone-900 shrink-0 cursor-pointer',
           'transition-colors enabled:hover:bg-teal-600 disabled:cursor-default',
           {
             'bg-teal-800':
@@ -45,27 +45,26 @@ export const Field = ({
 }: FiledProps) => {
   return (
     <div
-      className={cn('size-[400px] flex flex-wrap transition pointer-events-none', {
-        'scale-[1.05] pointer-events-auto brightness-100': isActive,
-      })}
+      className={cn(
+        'size-[320px] min-[425px]:max-[708]:size-[370px] md:size-[346px] lg:size-[400px] grid transition pointer-events-none grid-cols-10 grid-rows-10',
+        {
+          'scale-[1.05] pointer-events-auto brightness-100': isActive,
+        }
+      )}
     >
       {tilesMatrix.map((tilesRow, rowIdx) => {
-        return (
-          <div className={'flex'} key={`row-${rowIdx}`}>
-            {tilesRow.map((tile, tileIdx) => {
-              return (
-                <Tile
-                  tile={tile}
-                  x={tileIdx}
-                  y={rowIdx}
-                  onHit={onHit}
-                  key={`${tileIdx}-${tile.type}`}
-                  needShowVirginNoEmpty={needShowVirginNoEmpty}
-                />
-              );
-            })}
-          </div>
-        );
+        return tilesRow.map((tile, tileIdx) => {
+          return (
+            <Tile
+              tile={tile}
+              x={tileIdx}
+              y={rowIdx}
+              onHit={onHit}
+              key={`${tileIdx}-${tile.type}`}
+              needShowVirginNoEmpty={needShowVirginNoEmpty}
+            />
+          );
+        });
       })}
     </div>
   );

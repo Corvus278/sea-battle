@@ -120,9 +120,17 @@ export default function Home() {
   }, [initializeShips]);
 
   return (
-    <div className={'container mx-auto flex justify-center items-center size-full flex-col'}>
-      <h1 className={'mb-10 text-white text-3xl font-bold font-mono'}>Морской boy</h1>
-      <div className={'flex justify-center items-center gap-8'}>
+    <div
+      className={
+        'container mx-auto flex justify-center items-center min-h-full min-w-full flex-col pt-3 pb-5'
+      }
+    >
+      <h1 className={'mb-5 md:mb-10 text-white text-3xl font-bold font-mono'}>Морской boy</h1>
+      <div
+        className={
+          'flex justify-center items-center gap-6 flex-col min-[708]:flex-row min-[708]:gap-8'
+        }
+      >
         <PlayerField playerId={1} />
         <PlayerField playerId={2} />
       </div>
