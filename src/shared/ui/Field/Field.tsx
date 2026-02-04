@@ -46,9 +46,9 @@ export const Field = ({
   return (
     <div
       className={cn(
-        'size-[320px] min-[425px]:max-[708]:size-[370px] md:size-[346px] lg:size-[400px] grid transition pointer-events-none grid-cols-10 grid-rows-10',
+        'h-full max-h-[min(calc(100vw-36px),400px)] min-[708]:max-h-[min(calc(50vw-32px),400px)] aspect-square grid transition pointer-events-none grid-cols-10 grid-rows-10',
         {
-          'scale-[1.05] pointer-events-auto brightness-100': isActive,
+          'scale-[1.05] pointer-events-auto': isActive,
         }
       )}
     >
