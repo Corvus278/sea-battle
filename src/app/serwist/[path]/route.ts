@@ -8,7 +8,13 @@ const revision =
 
 export const { dynamic, dynamicParams, revalidate, generateStaticParams, GET } = createSerwistRoute(
   {
-    additionalPrecacheEntries: [{ url: '/~offline', revision }],
+    // Прекэшируем сам start_url ('/'), а не только шелл: iOS standalone холодно
+    // грузит start_url при каждом запуске и агрессивно чистит рантайм-кэш, поэтому
+    // NetworkFirst-навигации недостаточно для офлайна с первого запуска.
+    additionalPrecacheEntries: [
+      { url: '/', revision },
+      { url: '/~offline', revision },
+    ],
     swSrc: 'src/app/sw.ts',
     useNativeEsbuild: true,
     // Дефолтный target esbuild слишком старый (chrome64 и т.п.) и не умеет
