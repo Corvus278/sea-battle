@@ -109,6 +109,7 @@ Husky pre-commit хук (`npm run pre-commit`) гоняет `test` и `lint-stag
 
 - не делай git add
 - не делай git commit
+- в любой PR обязательно добавляй Preview URL от Vercel в описание (дождись деплоя, если ещё pending/building)
 
 ## Контекст
 
