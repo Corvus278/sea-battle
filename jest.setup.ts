@@ -47,9 +47,10 @@ global.IntersectionObserver = class IntersectionObserver {
 } as any;
 
 // Подавляем предупреждения console.error для чистого вывода тестов
+// eslint-disable-next-line no-console
 const originalError = console.error;
 beforeAll(() => {
-  // eslint-disable-next-line no-console
+  // eslint-disable-next-line no-console,@typescript-eslint/no-explicit-any
   console.error = (...args: any[]) => {
     if (
       typeof args[0] === 'string' &&
