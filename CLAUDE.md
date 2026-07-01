@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## О проекте
 
-«Морской бой» (Sea Battle) — веб-игра на Next.js 15 (App Router) + React 19 + TypeScript + Zustand + Tailwind CSS 4.
+«Морской boy» (Sea Battle) — веб-игра на Next.js 15 (App Router) + React 19 + TypeScript + Zustand + Tailwind CSS 4.
 Поддерживает PvP-режим для двух игроков на одном экране (мобильная и десктопная версии).
 
 Правила игры — см. `gameRules.md`: поле 10x10, флот из 1 четырёхпалубного, 2 трёхпалубных, 3 двухпалубных и 4
@@ -97,7 +97,7 @@ Husky pre-commit хук (`npm run pre-commit`) гоняет `test` и `lint-stag
 4. **Push** → Vercel автоматически поднимает Preview Deployment для ветки/PR.
 5. **PR** в `master`:
    - заголовок — в conventional формате;
-   - в описании — ссылка на issue (`Closes #12`) и Preview URL от Vercel.
+   - в описании — ссылка на issue (`Closes #12`).
 6. **Ревью** — код + Preview-ссылка. Правки по комментариям — новые коммиты в ту же ветку, Preview обновляется.
 7. **Merge** в `master` — обычный merge commit (без squash), сохраняется вся история коммитов ветки.
 8. **Auto-deploy на прод** — Vercel деплоит `master` в Production сразу после мержа.
