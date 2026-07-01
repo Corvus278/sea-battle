@@ -97,7 +97,7 @@ Husky pre-commit хук (`npm run pre-commit`) гоняет `test` и `lint-stag
 4. **Push** → Vercel автоматически поднимает Preview Deployment для ветки/PR.
 5. **PR** в `master`:
    - заголовок — в conventional формате;
-   - в описании — ссылка на issue (`Closes #12`) и Preview URL от Vercel.
+   - в описании — ссылка на issue (`Closes #12`).
 6. **Ревью** — код + Preview-ссылка. Правки по комментариям — новые коммиты в ту же ветку, Preview обновляется.
 7. **Merge** в `master` — обычный merge commit (без squash), сохраняется вся история коммитов ветки.
 8. **Auto-deploy на прод** — Vercel деплоит `master` в Production сразу после мержа.
