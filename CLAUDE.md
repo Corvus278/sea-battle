@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## О проекте
 
-«Морской бой» (Sea Battle) — веб-игра на Next.js 15 (App Router) + React 19 + TypeScript + Zustand + Tailwind CSS 4.
+«Морской boy» (Sea Battle) — веб-игра на Next.js 15 (App Router) + React 19 + TypeScript + Zustand + Tailwind CSS 4.
 Поддерживает PvP-режим для двух игроков на одном экране (мобильная и десктопная версии).
 
 Правила игры — см. `gameRules.md`: поле 10x10, флот из 1 четырёхпалубного, 2 трёхпалубных, 3 двухпалубных и 4

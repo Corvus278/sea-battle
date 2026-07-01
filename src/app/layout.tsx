@@ -3,12 +3,12 @@ import type { Metadata, Viewport } from 'next';
 import { SerwistProvider } from '@serwist/turbopack/react';
 import { UpdateBanner } from '@/shared/ui/UpdateBanner';
 
-const APP_NAME = 'Морской бой';
+const APP_NAME = 'Морской boy';
 
 export const metadata: Metadata = {
   applicationName: APP_NAME,
   title: 'Морской boy',
-  description: 'Морской бой — PvP на одном экране. Работает офлайн.',
+  description: 'Морской boy — PvP на одном экране. Работает офлайн.',
   manifest: '/manifest.json',
   appleWebApp: {
     capable: true,
